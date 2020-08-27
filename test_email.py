@@ -2,6 +2,7 @@ import smtplib
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import xlrd
+import urllib3
 
 
 def send_reply():
@@ -98,8 +99,17 @@ def get_sheet():
     print("waiting for 60 sec..")
     driver.implicitly_wait(60)
 
-    download_attachment = driver.find_element_by_xpath('//*[@id=":sm"]')
+    download_attachment = driver.find_element_by_xpath('//*[@id=":so"]')
     download_attachment.click()
+
+    print("waiting for 60 sec..")
+    driver.implicitly_wait(60)
+
+    print(driver.current_url)
+
+    http = urllib3.PoolManager()
+
+    http.request('GET', driver.current_url)
 
     print('Downlaod Started..!!')
     driver.implicitly_wait(50)
