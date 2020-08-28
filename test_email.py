@@ -28,6 +28,7 @@ class Testemailautomation(unittest.TestCase):
         logging.info("Gmail login started..")
         # opening log file for fresh update
         self.logfile = open('log_email_gmail.txt','a')
+        # identidfier for fresh excetion start point in log file
         logging.critical('<---------------Fresh Exection Started Now----------------->')
 
     def test_get_sheet(self):
