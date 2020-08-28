@@ -5,10 +5,8 @@ pre-requisites:
 * The excel sheet attached mail should already be sent/present to/in sender/source mail id
 * Speed of network connection should not be too slow, in order not to exceed given wait time periods in code.
 * manually authenticate for first time gmail login(using phone notification) on a new connection
-
-NOTE: The code retries the process for 1 more time, if desired end point is not reached in first attempt.
-
 """
+
 import xlrd
 import unittest
 import smtplib
@@ -36,7 +34,7 @@ class TestEmailAutomation(unittest.TestCase):
     logging.critical('<---------------Fresh Exection Started Now----------------->')
 
 
-    def test_get_sheet(self):
+    def test_process(self):
         '''
            This method logs into the gmail account of sender fetches the attached excel sheet from the corresponding inbox mail
            and gives it for needed calcualtion.
@@ -102,13 +100,11 @@ class TestEmailAutomation(unittest.TestCase):
             logging.debug('Downlaod Started..!!')
             logging.info('Successfully downloaded latest excel sheet!!')
             self.fetch_success = True
-    
-    def test_send_reply(self):
         '''
-            This method takes input excel sheet
+            This part takes input excel sheet
             and finds the total work hours from it and sends mail to recepient
          '''
-        if True:
+        if self.fetch_success:
              # open the excel sheet
             workbook = xlrd.open_workbook('~\\Downloads\\Tracker.xlsx')
 
