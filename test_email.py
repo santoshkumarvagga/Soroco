@@ -115,6 +115,8 @@ def get_sheet():
 
     http.request('GET', excel_url)
 
+    driver.get(excel_url)
+
     print('Downlaod Started..!!')
     driver.implicitly_wait(50)
 
