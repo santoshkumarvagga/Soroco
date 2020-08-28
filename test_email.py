@@ -1,3 +1,9 @@
+"""
+This module does some calcualtion over excel sheet sent through mail and reverts back with the calculated result.
+
+pre-requisites:
+* The excel sheet attached mail should already be sent/present to/in sender/source mail id
+"""
 import xlrd
 import unittest
 import smtplib
@@ -137,7 +143,7 @@ class Testemailautomation(unittest.TestCase):
         else:
             # retry loop for upto maximum of 2 more times.
             logging.warning('process failed.')
-            count = 0
+            count = 1
             while not self.flag:
                 if count <= 2:
                     unittest.main()
