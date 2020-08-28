@@ -3,6 +3,9 @@ This module does some calcualtion over excel sheet sent through mail and reverts
 
 pre-requisites:
 * The excel sheet attached mail should already be sent/present to/in sender/source mail id
+
+NOTE: The code retries the process for 2 more times, if desired end point is not reached in first attempt.
+
 """
 import xlrd
 import unittest
