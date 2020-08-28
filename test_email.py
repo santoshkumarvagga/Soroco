@@ -107,9 +107,6 @@ def get_sheet():
     print("waiting for 10 sec..")
     driver.implicitly_wait(10)
 
-    #locate_excel_file = driver.find_element_by_xpath('')
-    #print(driver.current_url)
-
     excel_url = driver.find_element_by_xpath('//*[@id=":re"]').get_attribute('href')
     
     print("The download url is", excel_url)
