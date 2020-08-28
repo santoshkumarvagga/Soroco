@@ -4,6 +4,8 @@ from selenium.webdriver.common.keys import Keys
 import xlrd
 import urllib3
 
+options = webdriver.ChromeOptions() 
+options.add_argument("download.default_directory='~\\Downloads\\'")
 
 def send_reply():
     '''
@@ -60,7 +62,7 @@ def get_sheet():
     gmailId = 'vaggasantoshkumar@gmail.com'
     passWord = 'Santosh@96'
     try: 
-        driver = webdriver.Chrome()
+        driver = webdriver.Chrome(chrome_options=options)
         driver.get(r'https://accounts.google.com/signin/v2/identifier?continue='+\
         'https%3A%2F%2Fmail.google.com%2Fmail%2F&service=mail&sacu=1&rip=1'+\
         '&flowName=GlifWebSignIn&flowEntry = ServiceLogin') 
@@ -102,14 +104,19 @@ def get_sheet():
     download_attachment = driver.find_element_by_xpath('//*[@id=":so"]')
     download_attachment.click()
 
-    print("waiting for 60 sec..")
-    driver.implicitly_wait(60)
+    print("waiting for 10 sec..")
+    driver.implicitly_wait(10)
 
-    print(driver.current_url)
+    #locate_excel_file = driver.find_element_by_xpath('')
+    #print(driver.current_url)
+
+    excel_url = driver.find_element_by_xpath('//*[@id=":re"]').get_attribute('href')
+    
+    print("The download url is", excel_url)
 
     http = urllib3.PoolManager()
 
-    http.request('GET', driver.current_url)
+    http.request('GET', excel_url)
 
     print('Downlaod Started..!!')
     driver.implicitly_wait(50)
