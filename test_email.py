@@ -3,8 +3,10 @@ This module does some calcualtion over excel sheet sent through mail and reverts
 
 pre-requisites:
 * The excel sheet attached mail should already be sent/present to/in sender/source mail id
+* Speed of network connection should not be too slow, in order not to exceed given wait time periods in code.
+* manually authenticate for first time gmail login(using phone notification) on a new connection
 
-NOTE: The code retries the process for 2 more times, if desired end point is not reached in first attempt.
+NOTE: The code retries the process for 1 more time, if desired end point is not reached in first attempt.
 
 """
 import xlrd
@@ -17,7 +19,7 @@ from selenium.webdriver.common.keys import Keys
 # define logging 
 logging.basicConfig(filename='log_email_gmail.txt',format='%(asctime)s : %(filename)s : %(funcName)s : %(levelname)s :  %(lineno)d - %(message)s', level = logging.DEBUG)
 
-class Testemailautomation(unittest.TestCase):
+class TestEmailAutomation(unittest.TestCase):
     '''Contains two test cases to illustrate excel sheet automation via gmail'''
 
     SENDER_MAIL = 'vaggasantoshkumar@gmail.com'
@@ -26,13 +28,13 @@ class Testemailautomation(unittest.TestCase):
     RECEIVER_MAIL = 'vaggasantoshkumar@gmail.com'
 
     flag = False
+    fetch_success = False
 
-    def setUp(self):
-        logging.info("Gmail login started..")
-        # opening log file for fresh update
-        self.logfile = open('log_email_gmail.txt','a')
-        # identidfier for fresh excetion start point in log file
-        logging.critical('<---------------Fresh Exection Started Now----------------->')
+    # opening log file for fresh update
+    logfile = open('log_email_gmail.txt','w')
+    # identidfier for fresh excetion start point in log file
+    logging.critical('<---------------Fresh Exection Started Now----------------->')
+
 
     def test_get_sheet(self):
         '''
@@ -42,6 +44,8 @@ class Testemailautomation(unittest.TestCase):
         '''
         try: 
             driver = webdriver.Chrome()
+
+            logging.info("Gmail login started..")
 
             driver.get(r'https://accounts.google.com/signin/v2/identifier?continue='+\
             'https%3A%2F%2Fmail.google.com%2Fmail%2F&service=mail&sacu=1&rip=1'+\
@@ -90,70 +94,59 @@ class Testemailautomation(unittest.TestCase):
         # hence embedding the url of the excel sheet directly to download it to Downloads folder.
 
         # download url for excel sheet in sender mail
-        status_code = driver.get('https://mail.google.com/mail/u/0/https://mail.google.com/mail/u/0?ui=2&ik=203a6d8d44&attid=0.1&permmsgid=msg-a:r-6768357511561605125&th=1742e4bbe0e07bac&view=att&disp=safe&realattid=f_keccbu160')
-        #assert status_code == 200, 'Failed to download excel sheet from sender mail.'
-
-        logging.debug('Downlaod Started..!!')
-
-        logging.debug('Successfully downloaded latest excel sheet!!')
-
-
+        try:
+            driver.get('https://mail.google.com/mail/u/0/https://mail.google.com/mail/u/0?ui=2&ik=203a6d8d44&attid=0.1&permmsgid=msg-a:r-6768357511561605125&th=1742e4bbe0e07bac&view=att&disp=safe&realattid=f_keccbu160')
+        except exception as e:
+            logging.error('{} raised. Failed to download excel sheet from sender mail.'.format(e))
+        else:
+            logging.debug('Downlaod Started..!!')
+            logging.info('Successfully downloaded latest excel sheet!!')
+            self.fetch_success = True
+    
     def test_send_reply(self):
         '''
-            This method takes input excel sheet 
+            This method takes input excel sheet
             and finds the total work hours from it and sends mail to recepient
          '''
-         # open the excel sheet
-        workbook = xlrd.open_workbook('~\\Downloads\\Tracker.xlsx')
+        if True:
+             # open the excel sheet
+            workbook = xlrd.open_workbook('~\\Downloads\\Tracker.xlsx')
 
-        # select the sheet
-        sheet1 = workbook.sheet_by_name('Sheet1')
+            # select the sheet
+            sheet1 = workbook.sheet_by_name('Sheet1')
 
-        # iterate throguh Hours coulmn
-        entries = []
-        for i in range(2,sheet1.nrows):
-            entries.append(sheet1.cell(i,4).value)
-    
-        # find the total sum
-        sum = 0
-        for i in entries:
-            if type(i)==float:
-                sum += i
+            # iterate throguh Hours coulmn
+            entries = []
+            for i in range(2,sheet1.nrows):
+                entries.append(sheet1.cell(i,4).value)
 
-        # establish connection to gmail
-        s = smtplib.SMTP('smtp.gmail.com', 587)
+            # find the total sum
+            sum = 0
+            for i in entries:
+                if type(i)==float:
+                    sum += i
 
-        s.starttls()
+            # establish connection to gmail
+            s = smtplib.SMTP('smtp.gmail.com', 587)
 
-        # login to sender gmail account
-        s.login(self.SENDER_MAIL, self.SENDER_PASSWORD)
+            s.starttls()
 
-        # display the expected result
-        message = "Calculated the total work hours - {} hours!!!".format(sum)
-
-        # send mail to receiver mail id
-        status_code = s.sendmail(self.SENDER_MAIL, [self.RECEIVER_MAIL], message)
-        #assert status_code == 0, 'Failed to send the response mail to recipient.'
-
-        s.quit()
-        self.flag = True
-
-
-    def tearDown(self):
-        if self.flag == True:
-            logging.info('Successfully sent response to recipient.')
-            logging.warning('Check the sender mail for the result.')
+            # login to sender gmail account
+            s.login(self.SENDER_MAIL, self.SENDER_PASSWORD)
+            
+            # display the expected result
+            message = "Calculated the total work hours - {} hours!!!".format(sum)
+            
+            # send mail to receiver mail id
+            try:
+                s.sendmail(self.SENDER_MAIL, [self.RECEIVER_MAIL], message)
+            except Exception as e:
+                logging.error('{} raised, Failed to send the response mail to recipient.'.format(e))
+                assert False, 'Failed to send the response mail to recipient.'
+            else:
+                logging.info('Successfully sent result to recipient mail. Please Check recipient mail..!!')
+            s.quit()
             self.logfile.close()
-        else:
-            # retry loop for upto maximum of 2 more times.
-            logging.warning('process failed.')
-            count = 1
-            while not self.flag:
-                if count <= 2:
-                    unittest.main()
-                    logging.info('Retrying Process for {} time..'.format(count))
-                    count += 1
-                break
 
 if __name__ == '__main__':
     unittest.main()
